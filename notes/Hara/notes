@@ -1,0 +1,7 @@
+Gas costs are calculated based on the opcodes used in your code.
+
+    Simple opcodes (ADD, MUL, etc.) → fixed gas cost
+
+    Complex opcodes (SSTORE, etc.) → variable gas cost depending on several factors
+
+    Bonus: You can get gas refunds for certain actions (like clearing a storage slot)
