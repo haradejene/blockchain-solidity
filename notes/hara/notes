@@ -5,3 +5,17 @@ Gas costs are calculated based on the opcodes used in your code.
     Complex opcodes (SSTORE, etc.) → variable gas cost depending on several factors
 
     Bonus: You can get gas refunds for certain actions (like clearing a storage slot)
+
+
+    An External function can only be invoked through a message call from another contract or an EOA. In contrast, an internal function call accesses variables directly from the contract's current execution context, avoiding the need for external inputs like calldata.
+
+The receive function requires external visibility as it's designed to receive ether through a message call. Its primary purpose is to offer developers a function body where they can define logic for handling incoming ether to a contract.
+
+Quite similarly, the fallback function also requires external visibility. What is the fallback function, you ask? Read on, my friend! 
+Fallback Function
+
+The fallback function is the function you're calling when no other function comes to the phone!
+
+All joking aside, it is really quite that simple.
+
+When a smart contract receives a call with calldata that doesn't match any of its function signatures, or if the calldata is empty, the fallback function is triggered. This can occur for various reasons, such as a typo in the function name, an incorrect argument type, or even for intentionally storing the calldata for future use like in a subsequent message call. If the contract doesn't know how to respond to the data sent to it, it will invoke the fallback function.
