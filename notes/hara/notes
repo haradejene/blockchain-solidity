@@ -40,3 +40,14 @@ contract Example() {
 }
 
 Calling this.b() will target the b function with an external message call back into the example contract. We generally want to avoid this behavior unless there's a good reason for it.
+
+
+Self-Destruct Repercussions
+
+When you call selfdestruct on a contract account, the bytecode is cleared. The contract will no longer be able to respond to ether transfers.
+
+If you are going to use selfdestruct, you should be sure that nobody will accidentally send ether to your contract in the future. There may be no recourse for getting that ether back if they do. Future funds sent to this address could be locked forever!
+
+    You might assume that once a contract's code is cleared from an address, that's the end of the story. However, with the later introduction of the CREATE2 opcode, you now have the ability to redeploy the same code to the same address. Unlike the traditional method, which relies on the sender's address and account nonce, CREATE2 uses a salt and the contract creation code to determine the contract address. Intrigued? Check out this tutorial for more.
+
+Instead of self-destructing the contract, you could consider setting storage variables so that nobody can call the function. Then you revert the transaction if they try to call a function or send ether in the future! This is probably the safest course of action.
