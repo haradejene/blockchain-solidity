@@ -51,3 +51,24 @@ If you are going to use selfdestruct, you should be sure that nobody will accide
     You might assume that once a contract's code is cleared from an address, that's the end of the story. However, with the later introduction of the CREATE2 opcode, you now have the ability to redeploy the same code to the same address. Unlike the traditional method, which relies on the sender's address and account nonce, CREATE2 uses a salt and the contract creation code to determine the contract address. Intrigued? Check out this tutorial for more.
 
 Instead of self-destructing the contract, you could consider setting storage variables so that nobody can call the function. Then you revert the transaction if they try to call a function or send ether in the future! This is probably the safest course of action.
+
+
+The Assert Keyword
+
+assert, require, and revert halt further code execution and immediately return control to the calling code, typically with an error message or code.
+
+These Solidity constructs are akin to throwing exceptions in many other languages, a core error-handling concept. While they all utilize the EVM's REVERT opcode, they differ in both meaning and function. Let's take a look at assert!
+
+Using assert reverts with a Panic(uint256) error. Reserve assert for internal checks and function invariants, which are essentially logical conditions that must always hold true during specific phases of code execution.
+
+Example usage of assert looks like:
+
+function withdrawEverything() external {
+    // withdraw everything to the msg sender
+    (bool s, ) = msg.sender.call { value: address(this).balance }("");
+    require(s);
+    
+
+    // this should never be false here!
+    assert(address(this).balance == 0);
+}
