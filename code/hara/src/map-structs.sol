@@ -1,0 +1,19 @@
+pragma solidity ^0.8.20;
+
+contract Contract {
+	struct User {
+		uint balance;
+		bool isActive;
+	}
+	
+	mapping(address => User) public users;
+	
+	function createUser() external {
+		require(!users[msg.sender].isActive, "User already exists and is active");
+		
+		users[msg.sender] = User({
+			balance: 100,
+			isActive: true
+		});
+	}
+}
