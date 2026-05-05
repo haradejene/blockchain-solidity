@@ -10,44 +10,37 @@ contract Voting {
     
     Proposal[] public proposals;
     
-    // Track votes: proposalId => voter => hasVoted and their choice
     mapping(uint => mapping(address => bool)) public hasVoted;
     mapping(uint => mapping(address => bool)) public votedYes;
     
+    event ProposalCreated(uint proposalId);
+    event VoteCast(uint proposalId, address voter);
+    
     function newProposal(address target, bytes calldata data) external {
-        Proposal memory newProposal = Proposal({
-            target: target,
-            data: data,
-            yesCount: 0,
-            noCount: 0
-        });
-        
-        proposals.push(newProposal);
+        proposals.push(Proposal(target, data, 0, 0));
+        emit ProposalCreated(proposals.length - 1);
     }
     
     function castVote(uint proposalId, bool _supports) external {
         require(proposalId < proposals.length, "Proposal does not exist");
         
         if (hasVoted[proposalId][msg.sender]) {
-           
+          
             bool previousVote = votedYes[proposalId][msg.sender];
             
-            
             if (previousVote != _supports) {
-                
+                // Vote is changing - update counts
                 if (_supports) {
-                    
-                    proposals[proposalId].noCount--;
                     proposals[proposalId].yesCount++;
+                    proposals[proposalId].noCount--;
                 } else {
-                    
                     proposals[proposalId].yesCount--;
                     proposals[proposalId].noCount++;
                 }
-                
                 votedYes[proposalId][msg.sender] = _supports;
             }
             
+            emit VoteCast(proposalId, msg.sender);
         } else {
             
             if (_supports) {
@@ -55,14 +48,9 @@ contract Voting {
             } else {
                 proposals[proposalId].noCount++;
             }
-
             hasVoted[proposalId][msg.sender] = true;
             votedYes[proposalId][msg.sender] = _supports;
+            emit VoteCast(proposalId, msg.sender);
         }
-    }
-    
-    function getVote(uint proposalId, address voter) external view returns (bool hasVotedAlready, bool voteChoice) {
-        hasVotedAlready = hasVoted[proposalId][voter];
-        voteChoice = votedYes[proposalId][voter];
     }
 }
