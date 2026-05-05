@@ -10,6 +10,10 @@ contract Voting {
     
     Proposal[] public proposals;
     
+    // Track votes: proposalId => voter => hasVoted and their choice
+    mapping(uint => mapping(address => bool)) public hasVoted;
+    mapping(uint => mapping(address => bool)) public votedYes;
+    
     function newProposal(address target, bytes calldata data) external {
         Proposal memory newProposal = Proposal({
             target: target,
@@ -24,10 +28,41 @@ contract Voting {
     function castVote(uint proposalId, bool _supports) external {
         require(proposalId < proposals.length, "Proposal does not exist");
         
-        if (_supports) {
-            proposals[proposalId].yesCount++;
+        if (hasVoted[proposalId][msg.sender]) {
+           
+            bool previousVote = votedYes[proposalId][msg.sender];
+            
+            
+            if (previousVote != _supports) {
+                
+                if (_supports) {
+                    
+                    proposals[proposalId].noCount--;
+                    proposals[proposalId].yesCount++;
+                } else {
+                    
+                    proposals[proposalId].yesCount--;
+                    proposals[proposalId].noCount++;
+                }
+                
+                votedYes[proposalId][msg.sender] = _supports;
+            }
+            
         } else {
-            proposals[proposalId].noCount++;
+            
+            if (_supports) {
+                proposals[proposalId].yesCount++;
+            } else {
+                proposals[proposalId].noCount++;
+            }
+
+            hasVoted[proposalId][msg.sender] = true;
+            votedYes[proposalId][msg.sender] = _supports;
         }
+    }
+    
+    function getVote(uint proposalId, address voter) external view returns (bool hasVotedAlready, bool voteChoice) {
+        hasVotedAlready = hasVoted[proposalId][voter];
+        voteChoice = votedYes[proposalId][voter];
     }
 }
