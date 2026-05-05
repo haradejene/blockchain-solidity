@@ -13,23 +13,43 @@ contract Voting {
     mapping(uint => mapping(address => bool)) public hasVoted;
     mapping(uint => mapping(address => bool)) public votedYes;
     
+    
+    mapping(address => bool) public isVotingMember;
+    
     event ProposalCreated(uint proposalId);
     event VoteCast(uint proposalId, address voter);
     
-    function newProposal(address target, bytes calldata data) external {
+    
+    constructor(address[] memory _members) {
+        
+        isVotingMember[msg.sender] = true;
+        
+        
+        for (uint i = 0; i < _members.length; i++) {
+            isVotingMember[_members[i]] = true;
+        }
+    }
+    
+    
+    modifier onlyMember() {
+        require(isVotingMember[msg.sender], "Not a voting member");
+        _;
+    }
+    
+    function newProposal(address target, bytes calldata data) external onlyMember {
         proposals.push(Proposal(target, data, 0, 0));
         emit ProposalCreated(proposals.length - 1);
     }
     
-    function castVote(uint proposalId, bool _supports) external {
+    function castVote(uint proposalId, bool _supports) external onlyMember {
         require(proposalId < proposals.length, "Proposal does not exist");
         
         if (hasVoted[proposalId][msg.sender]) {
-          
+            
             bool previousVote = votedYes[proposalId][msg.sender];
             
             if (previousVote != _supports) {
-                // Vote is changing - update counts
+                
                 if (_supports) {
                     proposals[proposalId].yesCount++;
                     proposals[proposalId].noCount--;
