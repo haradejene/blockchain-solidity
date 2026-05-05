@@ -20,4 +20,14 @@ contract Voting {
         
         proposals.push(newProposal);
     }
+    
+    function castVote(uint proposalId, bool _supports) external {
+        require(proposalId < proposals.length, "Proposal does not exist");
+        
+        if (_supports) {
+            proposals[proposalId].yesCount++;
+        } else {
+            proposals[proposalId].noCount++;
+        }
+    }
 }
