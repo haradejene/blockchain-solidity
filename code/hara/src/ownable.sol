@@ -12,3 +12,10 @@ contract Ownable {
         _;
     }
 }
+
+contract Transferable is Ownable {
+    function transfer(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "Cannot transfer to zero address");
+        owner = newOwner;
+    }
+}
