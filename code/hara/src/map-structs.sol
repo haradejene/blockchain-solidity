@@ -16,4 +16,15 @@ contract Contract {
 			isActive: true
 		});
 	}
+	
+	function transfer(address recipient, uint amount) external {
+		require(users[msg.sender].isActive, "Sender is not an active user");
+		
+		require(users[recipient].isActive, "Recipient is not an active user");
+		
+		require(users[msg.sender].balance >= amount, "Insufficient balance");
+		
+		users[msg.sender].balance -= amount;
+		users[recipient].balance += amount;
+	}
 }
