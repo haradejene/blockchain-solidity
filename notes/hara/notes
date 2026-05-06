@@ -1,0 +1,74 @@
+Gas costs are calculated based on the opcodes used in your code.
+
+    Simple opcodes (ADD, MUL, etc.) → fixed gas cost
+
+    Complex opcodes (SSTORE, etc.) → variable gas cost depending on several factors
+
+    Bonus: You can get gas refunds for certain actions (like clearing a storage slot)
+
+External function 
+
+An External function can only be invoked through a message call from another contract or an EOA. In contrast, an internal function call accesses variables directly from the contract's current execution context, avoiding the need for external inputs like calldata.
+
+The receive function requires external visibility as it's designed to receive ether through a message call. Its primary purpose is to offer developers a function body where they can define logic for handling incoming ether to a contract.
+
+Quite similarly, the fallback function also requires external visibility. What is the fallback function, you ask? Read on, my friend! 
+
+
+Fallback Function
+
+The fallback function is the function you're calling when no other function comes to the phone!
+
+All joking aside, it is really quite that simple.
+
+When a smart contract receives a call with calldata that doesn't match any of its function signatures, or if the calldata is empty, the fallback function is triggered. This can occur for various reasons, such as a typo in the function name, an incorrect argument type, or even for intentionally storing the calldata for future use like in a subsequent message call. If the contract doesn't know how to respond to the data sent to it, it will invoke the fallback function.
+
+
+this Message Calls
+
+In Solidity the this keyword give us access to the contract itself. We can call functions on it using the . operator:
+
+import "forge-std/console.sol";
+contract Example() {
+    function a() public view {
+        // NOTE: this makes an external function call
+        console.log( this.b() ); // 3
+    }
+    function b() public pure returns(uint) {
+        return 3;
+    }
+}
+
+Calling this.b() will target the b function with an external message call back into the example contract. We generally want to avoid this behavior unless there's a good reason for it.
+
+
+Self-Destruct Repercussions
+
+When you call selfdestruct on a contract account, the bytecode is cleared. The contract will no longer be able to respond to ether transfers.
+
+If you are going to use selfdestruct, you should be sure that nobody will accidentally send ether to your contract in the future. There may be no recourse for getting that ether back if they do. Future funds sent to this address could be locked forever!
+
+    You might assume that once a contract's code is cleared from an address, that's the end of the story. However, with the later introduction of the CREATE2 opcode, you now have the ability to redeploy the same code to the same address. Unlike the traditional method, which relies on the sender's address and account nonce, CREATE2 uses a salt and the contract creation code to determine the contract address. Intrigued? Check out this tutorial for more.
+
+Instead of self-destructing the contract, you could consider setting storage variables so that nobody can call the function. Then you revert the transaction if they try to call a function or send ether in the future! This is probably the safest course of action.
+
+
+The Assert Keyword
+
+assert, require, and revert halt further code execution and immediately return control to the calling code, typically with an error message or code.
+
+These Solidity constructs are akin to throwing exceptions in many other languages, a core error-handling concept. While they all utilize the EVM's REVERT opcode, they differ in both meaning and function. Let's take a look at assert!
+
+Using assert reverts with a Panic(uint256) error. Reserve assert for internal checks and function invariants, which are essentially logical conditions that must always hold true during specific phases of code execution.
+
+Example usage of assert looks like:
+
+function withdrawEverything() external {
+    // withdraw everything to the msg sender
+    (bool s, ) = msg.sender.call { value: address(this).balance }("");
+    require(s);
+    
+
+    // this should never be false here!
+    assert(address(this).balance == 0);
+}
