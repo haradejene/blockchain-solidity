@@ -14,6 +14,7 @@ This repository documents the successful completion of our **Blockchain & Solidi
 | 2 | Hermela Kassahun | UGR/30673/15 |
 | 3 | Tsion Birhanu | UGR/31331/15 |
 | 4 | Salahadin Nuredin | UGR/31168/68 |
+| 5 | Kaleb Samuel  | UGR/25336/14 |
 
 ---
 
